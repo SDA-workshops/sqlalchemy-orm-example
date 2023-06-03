@@ -3,7 +3,7 @@ from random import choice
 from faker import Faker
 from sqlalchemy.exc import IntegrityError
 
-from models import Base, Author, Article
+from models import Base, Author, Article, Hashtag
 from session import session
 
 
@@ -40,6 +40,25 @@ def create_articles(author_id, count=10):
     ]
 
 
+def create_hashtags(count=10):
+    fake = Faker()
+
+    hashtags = set()
+    while len(hashtags) < count:
+        hashtags.add(fake.word())
+
+    return [
+        Hashtag(name=hashtag)
+        for hashtag in hashtags
+    ]
+
+
+def assign_hashtags_to_articles(hashtags, articles):
+    for article in articles:
+        hashtag = choice(hashtags)
+        article.hashtags.append(hashtag)
+
+
 def main():
     # Create all tables
     Base.metadata.create_all()
@@ -60,6 +79,21 @@ def main():
     articles = create_articles(author_id=author.id)
     session.add_all(articles)
     session.commit()
+
+    # Create hashtags
+    hashtags = create_hashtags(count=100)
+    try:
+        session.add_all(hashtags)
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+
+    # Assign hashtags to articles
+    try:
+        assign_hashtags_to_articles(hashtags, articles)
+        session.commit()
+    except IntegrityError:
+        session.rollback()
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, Float, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Float, Text, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -20,7 +20,7 @@ class Author(Base):
     email = Column(String(50), unique=True, nullable=False)
     registration_date = Column(DateTime, default=datetime.datetime.now)
 
-    articles = relationship("Article")
+    articles = relationship("Article", back_populates="author")
 
     def __repr__(self):
         return f"Author({self.login})"
@@ -36,5 +36,47 @@ class Article(Base):
 
     author_id = Column(Integer, ForeignKey("authors.id"))
 
+    author = relationship("Author", back_populates="articles")
+    hashtags = relationship(
+        "Hashtag",
+        back_populates="articles",
+        secondary="articles_hashtags"
+    )
+
     def __repr__(self):
         return f"Article({self.title})"
+
+
+class Hashtag(Base):
+    __tablename__ = "hashtags"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), nullable=False, unique=True)
+    creation_date = Column(DateTime, default=datetime.datetime.now)
+
+    articles = relationship(
+        "Article",
+        back_populates="hashtags",
+        secondary = "articles_hashtags"
+    )
+
+    def __repr__(self):
+        return f"Hashtag({self.name})"
+
+
+article_hashtag = Table(
+    "articles_hashtags",
+    Base.metadata,
+    Column(
+        "article_id",
+        Integer,
+        ForeignKey("articles.id"),
+        primary_key=True
+    ),
+    Column(
+        "hashtag_id",
+        Integer,
+        ForeignKey("hashtags.id"),
+        primary_key=True
+    )
+)
