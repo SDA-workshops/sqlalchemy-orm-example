@@ -1,9 +1,9 @@
-from models import User
+from models import Author
 from session import session
 
 
 def main():
-    for user in session.query(User):
+    for user in session.query(Author):
         print(user)
 
 
