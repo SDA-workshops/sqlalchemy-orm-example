@@ -6,3 +6,11 @@ engine = create_engine(
 )
 Session = sessionmaker(bind=engine)
 session = Session()
+
+
+def commit_on_success(fn):
+    def wrapper(*args, **kwargs):
+        result = fn(*args, **kwargs)
+        session.commit()
+        return result
+    return wrapper
