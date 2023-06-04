@@ -57,7 +57,7 @@ class Hashtag(Base):
     articles = relationship(
         "Article",
         back_populates="hashtags",
-        secondary = "articles_hashtags"
+        secondary="articles_hashtags"
     )
 
     def __repr__(self):
