@@ -20,7 +20,11 @@ class Author(Base):
     email = Column(String(50), unique=True, nullable=False)
     registration_date = Column(DateTime, default=datetime.datetime.now)
 
-    articles = relationship("Article", back_populates="author")
+    articles = relationship(
+        "Article",
+        back_populates="author",
+        cascade="all, delete, delete-orphan"
+    )
 
     def __repr__(self):
         return f"Author({self.login})"
@@ -34,7 +38,7 @@ class Article(Base):
     content = Column(Text, nullable=False)
     publication_date = Column(DateTime, default=datetime.datetime.now)
 
-    author_id = Column(Integer, ForeignKey("authors.id"))
+    author_id = Column(Integer, ForeignKey("authors.id"), nullable=False)
 
     author = relationship("Author", back_populates="articles")
     hashtags = relationship(
